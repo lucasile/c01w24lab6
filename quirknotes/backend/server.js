@@ -4,7 +4,15 @@ import cors from "cors";
 
 const app = express();
 const PORT = 4000;
-const mongoURL = "mongodb://127.0.0.1:27017";
+
+let mongoURL;
+
+if (process.env.ENV === "Docker") {
+  mongoURL = "mongodb://mongodb:27017";
+} else {
+  mongoURL = "mongodb://127.0.0.1:27017";
+}
+
 const dbName = "quirknotes";
 
 // Connect to MongoDB
@@ -49,7 +57,7 @@ app.get("/getAllNotes", express.json(), async (req, res) => {
     res.status(500).json({error: error.message})
   }
 })
-  
+
 // Post a note
 app.post("/postNote", express.json(), async (req, res) => {
   try {
@@ -106,7 +114,7 @@ app.delete("/deleteNote/:noteId", express.json(), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 })
-  
+
 // Patch a note
 app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
   try {
@@ -124,7 +132,7 @@ app.patch("/patchNote/:noteId", express.json(), async (req, res) => {
         .json({ error: "Must have at least one of title or content." });
     }
 
-    
+
     // Find note with given ID
     const collection = db.collection(COLLECTIONS.notes);
     const data = await collection.updateOne({
